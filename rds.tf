@@ -68,6 +68,17 @@ resource "aws_security_group" "rds_security_group_public" {
     protocol    = "tcp"
     cidr_blocks = [ "0.0.0.0/0" ]
   }
+
+  # For SSH tunneling and connecting to the RDS instance from the EC2 machine
+  # Command to SSH tunnel and connect to the localhost on port 5432
+  # ssh -N -L 5432:<<rds-instance>>:5432 ec2-user@<<ec2-instance>> -i <<pem-file>>
+  egress {
+   from_port       = 5432
+   to_port         = 5432
+   protocol        = "tcp"
+   cidr_blocks     = [ "0.0.0.0/0" ]
+ }
+
 }
 
 # Private subsets
@@ -179,4 +190,6 @@ resource "aws_db_instance" "rds" {
   db_subnet_group_name = "${aws_db_subnet_group.rds_subnet_group.name}"
 
   vpc_security_group_ids = [ "${aws_security_group.rds_security_group_private.id}" ]
+
+  skip_final_snapshot = true
 }
